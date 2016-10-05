@@ -1,21 +1,24 @@
 package ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import wekaCore.GenerateModels;
-
-import javax.swing.Box;
-import java.awt.Component;
-import javax.swing.JProgressBar;
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.trees.J48;
+import wekaCore.ModelGenerator;
 
 
 @SuppressWarnings("serial")
@@ -42,9 +45,10 @@ public class MainWindow extends JFrame implements ActionListener {
 	private Component m_hBoxActionBtnRightMiddleSpacer;
 	private JButton m_findPromotersBtn;
 	private Component m_hBoxActionBtnRightSpacer;
-
-	// Progress bar
-	private JProgressBar m_progressBar;
+	
+	private J48 m_j48Model;
+	private NaiveBayes m_naiveBayesModel;
+	private MultilayerPerceptron m_mlpModel;
 
 	@SuppressWarnings("deprecation")
 	public MainWindow() {
@@ -54,10 +58,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		createImportLayout();
 		createActionButtonsLayout();
 
-		m_progressBar = new JProgressBar();
-		getContentPane().add(m_progressBar, BorderLayout.SOUTH);
-
-		setSize(502, 100);
+		setSize(502, 85);
 		show();
 	}
 
@@ -124,18 +125,23 @@ public class MainWindow extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (IMPORT_BASE.equals(e.getActionCommand())) {
-			JOptionPane.showMessageDialog(null, "You Pressed: " + IMPORT_BASE);
-			ArffExplorer arffExplorer = new ArffExplorer();
+			FileExplorer arffExplorer = new FileExplorer();
+			arffExplorer.exploreFiles();
 			m_basePath.setText(arffExplorer.getFilePath());
 			m_generateModelsBtn.setEnabled(true);
 			m_importModelsBtn.setEnabled(true);
 		} else if (GENERATE_MODELS.equals(e.getActionCommand())) {
-			JOptionPane.showMessageDialog(null, "You Pressed: " + GENERATE_MODELS);
-			GenerateModels models = new GenerateModels(m_basePath.getText());
+			ModelGenerator models = new ModelGenerator(m_basePath.getText());
+			ArrayList<Classifier> modelList = new ArrayList<Classifier>();
+			modelList = models.getModels();
+			m_j48Model = (J48) modelList.get(0);
+			m_naiveBayesModel = (NaiveBayes) modelList.get(1);
+			m_mlpModel = (MultilayerPerceptron) modelList.get(2);
 		} else if (IMPORT_MODELS.equals(e.getActionCommand())) {
-			JOptionPane.showMessageDialog(null, "You Pressed: " + IMPORT_MODELS);
+			/// TODO: Block the button if a model was generated.
 		} else if (FIND_PROMOTERS.equals(e.getActionCommand())) {
-			JOptionPane.showMessageDialog(null, "You Pressed: " + FIND_PROMOTERS);
+			/// TODO: Check if any model isnt null.
+			/// The user may find promoters using only one model.
 		}
 	}
 	
