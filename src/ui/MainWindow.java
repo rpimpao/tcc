@@ -41,14 +41,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	private Component m_hBoxActionBtnLeftSpacer;
 	private JButton m_generateModelsBtn;
 	private Component m_hBoxActionBtnLeftMiddleSpacer;
-	private JButton m_importModelsBtn;
-	private Component m_hBoxActionBtnRightMiddleSpacer;
 	private JButton m_findPromotersBtn;
 	private Component m_hBoxActionBtnRightSpacer;
-	
-	private J48 m_j48Model;
-	private NaiveBayes m_naiveBayesModel;
-	private MultilayerPerceptron m_mlpModel;
 
 	@SuppressWarnings("deprecation")
 	public MainWindow() {
@@ -93,15 +87,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		m_hBoxActionBtnLeftMiddleSpacer = Box.createHorizontalGlue();
 		m_hBoxActionButtons.add(m_hBoxActionBtnLeftMiddleSpacer);
 
-		m_importModelsBtn = new JButton("Importar modelos");
-		m_importModelsBtn.setEnabled(false);
-		m_importModelsBtn.setActionCommand(IMPORT_MODELS);
-		m_importModelsBtn.addActionListener(this);
-		m_hBoxActionButtons.add(m_importModelsBtn);
-
-		m_hBoxActionBtnRightMiddleSpacer = Box.createHorizontalGlue();
-		m_hBoxActionButtons.add(m_hBoxActionBtnRightMiddleSpacer);
-
 		m_findPromotersBtn = new JButton("Encontrar promotores");
 		m_findPromotersBtn.setEnabled(false);
 		m_findPromotersBtn.setActionCommand(FIND_PROMOTERS);
@@ -125,18 +110,14 @@ public class MainWindow extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (IMPORT_BASE.equals(e.getActionCommand())) {
-			FileExplorer arffExplorer = new FileExplorer();
-			arffExplorer.exploreFiles();
-			m_basePath.setText(arffExplorer.getFilePath());
+			FileExplorer fileExplorer = new FileExplorer();
+			String filePath = fileExplorer.exploreArffFiles();
+			m_basePath.setText(filePath);
 			m_generateModelsBtn.setEnabled(true);
-			m_importModelsBtn.setEnabled(true);
 		} else if (GENERATE_MODELS.equals(e.getActionCommand())) {
 			ModelGenerator models = new ModelGenerator(m_basePath.getText());
 			ArrayList<Classifier> modelList = new ArrayList<Classifier>();
 			modelList = models.getModels();
-			m_j48Model = (J48) modelList.get(0);
-			m_naiveBayesModel = (NaiveBayes) modelList.get(1);
-			m_mlpModel = (MultilayerPerceptron) modelList.get(2);
 		} else if (IMPORT_MODELS.equals(e.getActionCommand())) {
 			/// TODO: Block the button if a model was generated.
 		} else if (FIND_PROMOTERS.equals(e.getActionCommand())) {
