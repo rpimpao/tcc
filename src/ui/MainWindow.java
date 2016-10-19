@@ -11,13 +11,9 @@ import java.util.ArrayList;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.functions.MultilayerPerceptron;
-import weka.classifiers.trees.J48;
 import wekaCore.ModelGenerator;
 
 
@@ -118,6 +114,10 @@ public class MainWindow extends JFrame implements ActionListener {
 			ModelGenerator models = new ModelGenerator(m_basePath.getText());
 			ArrayList<Classifier> modelList = new ArrayList<Classifier>();
 			modelList = models.getModels();
+			if(!modelList.isEmpty())
+			{
+				// TEMP - remove warning.
+			}
 		} else if (IMPORT_MODELS.equals(e.getActionCommand())) {
 			/// TODO: Block the button if a model was generated.
 		} else if (FIND_PROMOTERS.equals(e.getActionCommand())) {

@@ -1,14 +1,11 @@
 package wekaCore;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import ui.FileExplorer;
 import weka.classifiers.Classifier;
