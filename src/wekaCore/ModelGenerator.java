@@ -60,7 +60,6 @@ public class ModelGenerator {
 			try {
 				mlpOutputStream = new ObjectOutputStream(
 						new FileOutputStream(path + "/" + m_models.get(i).getClass().getSimpleName() + ".model"));
-				JOptionPane.showMessageDialog(null, m_models.get(i).getClass().getSimpleName());
 				mlpOutputStream.writeObject(m_models.get(i));
 				mlpOutputStream.flush();
 				mlpOutputStream.close();
@@ -77,7 +76,7 @@ public class ModelGenerator {
 			try {
 				eval = new Evaluation(instances);
 				eval.crossValidateModel(m_models.get(i), instances, 10, new Random(1));
-				JOptionPane.showMessageDialog(null, eval.correct());
+				//JOptionPane.showMessageDialog(null, eval.correct());
 				/// TODO: How to show the user the algorithm accuracy?
 			} catch (Exception e) {
 				e.printStackTrace();
