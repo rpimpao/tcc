@@ -2,7 +2,6 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -13,7 +12,6 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -84,7 +82,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private void createImportLayout() {
 		hBoxLayoutImportBase = Box.createHorizontalBox();
-		//getContentPane().add(hBoxLayoutImportBase, BorderLayout.NORTH);
 
 		m_hBoxImportLeftSpacer = Box.createHorizontalStrut(20);
 		hBoxLayoutImportBase.add(m_hBoxImportLeftSpacer);
@@ -125,7 +122,6 @@ public class MainWindow extends JFrame implements ActionListener {
 
 	private void createActionButtonsLayout() {
 		m_hBoxActionButtons = Box.createHorizontalBox();
-		//getContentPane().add(m_hBoxActionButtons, BorderLayout.CENTER);
 
 		m_hBoxActionBtnLeftSpacer = Box.createHorizontalGlue();
 		m_hBoxActionButtons.add(m_hBoxActionBtnLeftSpacer);
@@ -163,6 +159,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			String filePath = fileExplorer.exploreArffFiles();
 			m_basePath.setText(filePath);
 			m_generateModelsBtn.setEnabled(true);
+			m_findPromotersBtn.setEnabled(true);
 		} else if (GENERATE_MODELS.equals(e.getActionCommand())) {
 			ModelGenerator models = new ModelGenerator(m_basePath.getText());
 			ArrayList<Classifier> modelList = new ArrayList<Classifier>();
@@ -172,13 +169,14 @@ public class MainWindow extends JFrame implements ActionListener {
 				// Weird stuff. Had to replace \n to <br> and set the text as html inside the label to allow "multilines"...
 				m_j48Result.setText("<html>" + modelList.get(0).toString().replace("\n", "<br>") + "</html>");
 				m_naiveResult.setText("<html>" + modelList.get(1).toString().replace("\n", "<br>") + "</html>");
-				m_mlpResult.setText("<html>" + modelList.get(2).toString().replace("\n", "<br>") + "</html>");
+				//m_mlpResult.setText("<html>" + modelList.get(2).toString().replace("\n", "<br>") + "</html>");
 				
 				m_tabPanel.setVisible(true);
 				setSize(getWidth(), getHeight() + m_tabPanel.getHeight());
 			}
 		} else if (IMPORT_MODELS.equals(e.getActionCommand())) {
 			/// TODO: Block the button if a model was generated.
+			
 		} else if (FIND_PROMOTERS.equals(e.getActionCommand())) {
 			/// TODO: Check if any model isnt null.
 			/// The user may find promoters using only one model.
