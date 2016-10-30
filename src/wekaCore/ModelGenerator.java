@@ -1,5 +1,6 @@
 package wekaCore;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -8,12 +9,17 @@ import java.util.Random;
 import javax.swing.JOptionPane;
 
 import ui.FileExplorer;
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.BestFirst;
+import weka.attributeSelection.CfsSubsetEval;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
+import weka.core.converters.ArffSaver;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class ModelGenerator {
@@ -24,15 +30,42 @@ public class ModelGenerator {
 		NaiveBayes naiveBayesModel = new NaiveBayes();
 		MultilayerPerceptron mlpModel = new MultilayerPerceptron();
 
+		//AttributeSelectedClassifier j48Classifier = new AttributeSelectedClassifier();
+		//AttributeSelectedClassifier naiveClassifier = new AttributeSelectedClassifier();
+		//AttributeSelectedClassifier mlpClassifier = new AttributeSelectedClassifier();
+		
 		try {
 			DataSource baseInstances = new DataSource(filePath);
 			Instances instances = baseInstances.getDataSet();
-			// TODO: set class attibute?
 			instances.setClassIndex(instances.numAttributes() - 1);
+			Instances reducedInstances = instances;
+			
+			int dialogResult = JOptionPane.showConfirmDialog(null, "Você gostaria de reduzir a base?" + 
+					"O processo pode ser demorado, mas a geração dos modelos será mais rápida.", "Atenção!", JOptionPane.YES_NO_OPTION);
+			if(dialogResult == JOptionPane.YES_OPTION){
+				// Attribute selection
+				AttributeSelection attsel = new AttributeSelection();
+				CfsSubsetEval subsetEval = new CfsSubsetEval();
+				BestFirst bestFirst = new BestFirst();
 
-			j48Model.buildClassifier(instances);
-			naiveBayesModel.buildClassifier(instances);
-			mlpModel.buildClassifier(instances);
+				attsel.setEvaluator(subsetEval);
+				attsel.setSearch(bestFirst);
+				attsel.SelectAttributes(instances);
+				reducedInstances = attsel.reduceDimensionality(instances);
+				
+				JOptionPane.showMessageDialog(null, "Reduced vs normal " + reducedInstances.numAttributes() + " " + instances.numAttributes());
+				
+				// Save the reduced base to avoid waiting for hours...
+				String reducedBasePath = filePath.replace(".arff", "_REDUCED.arff");
+				ArffSaver saver = new ArffSaver();
+				saver.setInstances(reducedInstances);
+				saver.setFile(new File(reducedBasePath));
+				saver.writeBatch();
+			}
+			
+			j48Model.buildClassifier(reducedInstances);
+			naiveBayesModel.buildClassifier(reducedInstances);
+			mlpModel.buildClassifier(reducedInstances);
 
 			m_models = new ArrayList<Classifier>();
 			
@@ -40,7 +73,7 @@ public class ModelGenerator {
 			m_models.add(naiveBayesModel);
 			m_models.add(mlpModel);
 			
-			evaluateModels(instances);
+			evaluateModels(reducedInstances);
 			
 			/// TODO: Ask to save models
 			saveModels();
@@ -75,8 +108,8 @@ public class ModelGenerator {
 		for (int i = 0; i < m_models.size(); i++) {
 			try {
 				eval = new Evaluation(instances);
+				JOptionPane.showMessageDialog(null, "Evaluating model " + i);
 				eval.crossValidateModel(m_models.get(i), instances, 10, new Random(1));
-				JOptionPane.showMessageDialog(null, eval.correct());
 				/// TODO: How to show the user the algorithm accuracy?
 			} catch (Exception e) {
 				e.printStackTrace();

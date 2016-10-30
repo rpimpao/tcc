@@ -18,6 +18,7 @@ import javax.swing.JTextField;
 
 import weka.classifiers.Classifier;
 import wekaCore.ModelGenerator;
+import wekaCore.PromoterFinder;
 
 
 @SuppressWarnings("serial")
@@ -54,11 +55,14 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JLabel m_j48Result;
 	private JLabel m_naiveResult;
 	private JLabel m_mlpResult;
+	
+	private ArrayList<Classifier> m_models;
 
 	@SuppressWarnings("deprecation")
 	public MainWindow() {
 		setTitle("Projeto Final");
 		setResizable(false);
+		m_models = new ArrayList<Classifier>();
 
 		createImportLayout();
 		createActionButtonsLayout();
@@ -111,7 +115,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		m_hBoxActionButtons.add(m_hBoxActionBtnLeftMiddleSpacer);
 
 		m_findPromotersBtn = new JButton("Encontrar promotores");
-		m_findPromotersBtn.setEnabled(false);
+		//m_findPromotersBtn.setEnabled(false);
 		m_findPromotersBtn.setActionCommand(FIND_PROMOTERS);
 		m_findPromotersBtn.addActionListener(this);
 		m_hBoxActionButtons.add(m_findPromotersBtn);
@@ -166,20 +170,25 @@ public class MainWindow extends JFrame implements ActionListener {
 			modelList = models.getModels();
 			if(!modelList.isEmpty())
 			{
+				m_models = modelList;
+				
 				// Weird stuff. Had to replace \n to <br> and set the text as html inside the label to allow "multilines"...
 				m_j48Result.setText("<html>" + modelList.get(0).toString().replace("\n", "<br>") + "</html>");
 				m_naiveResult.setText("<html>" + modelList.get(1).toString().replace("\n", "<br>") + "</html>");
-				//m_mlpResult.setText("<html>" + modelList.get(2).toString().replace("\n", "<br>") + "</html>");
+				m_mlpResult.setText("<html>" + modelList.get(2).toString().replace("\n", "<br>") + "</html>");
 				
 				m_tabPanel.setVisible(true);
 				setSize(getWidth(), getHeight() + m_tabPanel.getHeight());
 			}
 		} else if (IMPORT_MODELS.equals(e.getActionCommand())) {
 			/// TODO: Block the button if a model was generated.
-			
 		} else if (FIND_PROMOTERS.equals(e.getActionCommand())) {
-			/// TODO: Check if any model isnt null.
-			/// The user may find promoters using only one model.
+			try {
+				PromoterFinder finder = new PromoterFinder(m_models);
+				// TODO: get results and show them on tabs
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 	
