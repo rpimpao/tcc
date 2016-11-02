@@ -16,7 +16,6 @@ import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.functions.MultilayerPerceptron;
-import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
@@ -24,15 +23,12 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class ModelGenerator {
 	private ArrayList<Classifier> m_models;
+	private ArrayList<String> m_evalResult;
 	
 	public ModelGenerator(String filePath) {
 		J48 j48Model = new J48();
 		NaiveBayes naiveBayesModel = new NaiveBayes();
 		MultilayerPerceptron mlpModel = new MultilayerPerceptron();
-
-		//AttributeSelectedClassifier j48Classifier = new AttributeSelectedClassifier();
-		//AttributeSelectedClassifier naiveClassifier = new AttributeSelectedClassifier();
-		//AttributeSelectedClassifier mlpClassifier = new AttributeSelectedClassifier();
 		
 		try {
 			DataSource baseInstances = new DataSource(filePath);
@@ -76,23 +72,25 @@ public class ModelGenerator {
 			evaluateModels(reducedInstances);
 			
 			/// TODO: Ask to save models
-			saveModels();
+			saveModels(filePath);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void saveModels()
+	private void saveModels(String filePath)
 	{
 		FileExplorer arf = new FileExplorer();
 		String path = arf.searchDir();
+		
+		File arffFile = new File(filePath);
 		
 		for (int i = 0; i < m_models.size(); i++) {
 			ObjectOutputStream mlpOutputStream;
 			try {
 				mlpOutputStream = new ObjectOutputStream(
-						new FileOutputStream(path + "/" + m_models.get(i).getClass().getSimpleName() + ".model"));
+						new FileOutputStream(path + "/" + m_models.get(i).getClass().getSimpleName() + "_" + arffFile.getName().replace(".arff", "") + ".model"));
 				mlpOutputStream.writeObject(m_models.get(i));
 				mlpOutputStream.flush();
 				mlpOutputStream.close();
@@ -105,12 +103,12 @@ public class ModelGenerator {
 	private void evaluateModels(Instances instances)
 	{
 		Evaluation eval;
+		m_evalResult = new ArrayList<String>();
 		for (int i = 0; i < m_models.size(); i++) {
 			try {
 				eval = new Evaluation(instances);
-				JOptionPane.showMessageDialog(null, "Evaluating model " + i);
 				eval.crossValidateModel(m_models.get(i), instances, 10, new Random(1));
-				/// TODO: How to show the user the algorithm accuracy?
+				m_evalResult.add(eval.toSummaryString("\nResults\n======\n", false).concat(eval.toClassDetailsString("\nDetailed Accuracy Results\n======\n")).concat(eval.toMatrixString("\nConfusion Matrix\n======\n")));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -120,5 +118,10 @@ public class ModelGenerator {
 	public ArrayList<Classifier> getModels()
 	{
 		return m_models;
+	}
+	
+	public ArrayList<String> getEvalResult()
+	{
+		return m_evalResult;
 	}
 }

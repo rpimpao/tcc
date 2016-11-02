@@ -7,12 +7,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
@@ -55,6 +58,9 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JLabel m_j48Result;
 	private JLabel m_naiveResult;
 	private JLabel m_mlpResult;
+	private JScrollPane m_j48ScrollPanel;
+	private JScrollPane m_naiveScrollPanel;
+	private JScrollPane m_mlpScrollPanel;
 	
 	private ArrayList<Classifier> m_models;
 
@@ -143,10 +149,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		m_naivePanel = new JPanel();
 		m_mlpPanel = new JPanel();
 		
-		m_tabPanel.addTab("J48", m_j48Panel);
-		m_tabPanel.addTab("Naive Bayes", m_naivePanel);
-		m_tabPanel.addTab("MLP", m_mlpPanel);
-		
 		m_j48Result = new JLabel();
 		m_naiveResult = new JLabel();
 		m_mlpResult = new JLabel();
@@ -154,6 +156,22 @@ public class MainWindow extends JFrame implements ActionListener {
 		m_j48Panel.add(m_j48Result);
 		m_naivePanel.add(m_naiveResult);
 		m_mlpPanel.add(m_mlpResult);
+		
+		m_j48ScrollPanel = new JScrollPane(m_j48Panel);
+		m_j48ScrollPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		m_j48ScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		
+		m_naiveScrollPanel = new JScrollPane(m_naivePanel);
+		m_naiveScrollPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		m_naiveScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		
+		m_mlpScrollPanel = new JScrollPane(m_mlpPanel);
+		m_mlpScrollPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		m_mlpScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		
+		m_tabPanel.addTab("J48", m_j48ScrollPanel);
+		m_tabPanel.addTab("Naive Bayes", m_naiveScrollPanel);
+		m_tabPanel.addTab("MLP", m_mlpScrollPanel);
 	}
 	
 	@Override
@@ -167,15 +185,17 @@ public class MainWindow extends JFrame implements ActionListener {
 		} else if (GENERATE_MODELS.equals(e.getActionCommand())) {
 			ModelGenerator models = new ModelGenerator(m_basePath.getText());
 			ArrayList<Classifier> modelList = new ArrayList<Classifier>();
+			ArrayList<String> evalList = new ArrayList<String>();
 			modelList = models.getModels();
+			evalList = models.getEvalResult();
 			if(!modelList.isEmpty())
 			{
 				m_models = modelList;
 				
 				// Weird stuff. Had to replace \n to <br> and set the text as html inside the label to allow "multilines"...
-				m_j48Result.setText("<html>" + modelList.get(0).toString().replace("\n", "<br>") + "</html>");
-				m_naiveResult.setText("<html>" + modelList.get(1).toString().replace("\n", "<br>") + "</html>");
-				m_mlpResult.setText("<html>" + modelList.get(2).toString().replace("\n", "<br>") + "</html>");
+				m_j48Result.setText("<html>" + modelList.get(0).toString().replace("\n", "<br>") + evalList.get(0).replace("\n", "<br>") + "</html>");
+				m_naiveResult.setText("<html>" + modelList.get(1).toString().replace("\n", "<br>") + evalList.get(1).replace("\n", "<br>") + "</html>");
+				m_mlpResult.setText("<html>" + modelList.get(2).toString().replace("\n", "<br>") + evalList.get(2).replace("\n", "<br>") + "</html>");
 				
 				m_tabPanel.setVisible(true);
 				setSize(getWidth(), getHeight() + m_tabPanel.getHeight());
@@ -185,7 +205,29 @@ public class MainWindow extends JFrame implements ActionListener {
 		} else if (FIND_PROMOTERS.equals(e.getActionCommand())) {
 			try {
 				PromoterFinder finder = new PromoterFinder(m_models);
-				// TODO: get results and show them on tabs
+				HashMap<String, ArrayList<String>> results = finder.getResults();
+				
+				for (Map.Entry<String, ArrayList<String>> entry : results.entrySet()) 
+				{
+				    String key = entry.getKey();
+				    ArrayList<String> value = entry.getValue();
+				    if(key.contains("J48"))
+				    {
+				    	m_j48Result.setText("<html>" + value.toString().replace("\n", "<br>") + "</html>");
+				    }
+				    else if(key.contains("Naive"))
+				    {
+				    	m_naiveResult.setText("<html>" + value.toString().replace("\n", "<br>") + "</html>");
+				    }
+				    else if(key.contains("Multilayer"))
+				    {
+				    	m_mlpResult.setText("<html>" + value.toString().replace("\n", "<br>") + "</html>");
+				    }
+				}
+				
+				m_tabPanel.setVisible(true);
+				setSize(getWidth(), getHeight() + m_tabPanel.getHeight());
+			    
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}

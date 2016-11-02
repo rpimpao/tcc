@@ -1,9 +1,10 @@
 package wekaCore;
 
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.ObjectInputStream;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JOptionPane;
 
@@ -16,35 +17,68 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class PromoterFinder {
 	private ArrayList<Classifier> m_models;
 	private String m_basePath;
+	private HashMap<String,ArrayList<String>> m_results;
 	
-	public PromoterFinder(ArrayList<Classifier> models) throws Exception
+	public PromoterFinder(ArrayList<Classifier> models) throws Exception 
 	{
 		JOptionPane.showMessageDialog(null, "Importe uma base para ser classificada.");
 		FileExplorer explorer = new FileExplorer();
 		m_basePath = explorer.exploreArffFiles();
-		
-		if(models.isEmpty())
+
+		if (models.isEmpty()) 
 		{
 			importModels();
-		}
-		else
+		} 
+		else 
 		{
 			m_models = models;
 		}
-		
+
 		DataSource baseInstances = new DataSource(m_basePath);
+		// Unlabled
 		Instances instances = baseInstances.getDataSet();
-		// TODO: set class attibute?
 		instances.setClassIndex(instances.numAttributes() - 1);
+
+		Instances labeled = new Instances(instances);
+
+		m_results = new HashMap<String,ArrayList<String>>();
 		
-		for(int i = 0; i < m_models.size(); i++)
+		for (int i = 0; i < m_models.size(); i++) 
 		{
-			// Run with the last instance of the dataset
-			double result = m_models.get(i).classifyInstance(instances.lastInstance());
-			JOptionPane.showMessageDialog(null, result);
+			
+			// Run with the last instance of the dataset -> test only
+			// label instances
+			ArrayList<String> results = new ArrayList<String>();
+			for (int j = 0; j < instances.numInstances(); j++) 
+			{
+				double result = m_models.get(i).classifyInstance(instances.instance(j));
+				labeled.instance(j).setClassValue(result);
+
+				double[] output = m_models.get(i).distributionForInstance(instances.instance(j));
+				
+				/*System.out.print("ID: " + instances.instance(i).value(0));
+				System.out.print(
+						", actual: " + instances.classAttribute().value((int) instances.instance(j).classValue()));
+				System.out.print(", predicted: " + instances.classAttribute().value((int) result));
+				System.out.println(", accuracy: " + output[((int) result)] * 100 + "%");*/
+				
+				String formattedResult = "Actual: " + instances.classAttribute().value((int) instances.instance(j).classValue()) 
+						+ ", Predicted: " + instances.classAttribute().value((int) result)
+						+ ", Accuracy: " + output[((int) result)] * 100 + "%\n";
+				
+				results.add(formattedResult);
+			}
+			m_results.put(m_models.get(i).getClass().getName(), results);
 		}
+
+		// save labeled data
+		BufferedWriter writer = new BufferedWriter(new FileWriter(m_basePath.replace(".arff", "_CLASSIFICADA.arff")));
+		writer.write(labeled.toString());
+		writer.newLine();
+		writer.flush();
+		writer.close();
 	}
-	
+
 	private void importModels()
 	{
 		FileExplorer explorer = new FileExplorer();
@@ -59,5 +93,10 @@ public class PromoterFinder {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public HashMap<String, ArrayList<String>> getResults()
+	{
+		return m_results;
 	}
 }
