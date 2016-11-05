@@ -11,12 +11,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import weka.classifiers.Classifier;
@@ -29,8 +31,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	// Actions
 	private String IMPORT_BASE = "importBase";
 	private String GENERATE_MODELS = "generateModels";
-	private String IMPORT_MODELS = "importModels";
 	private String FIND_PROMOTERS = "findPromoters";
+	private String EXPORT_RESULT = "exportResults";
 	
 	// Top layout
 	private Box m_vTopLayout;
@@ -61,6 +63,10 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JScrollPane m_j48ScrollPanel;
 	private JScrollPane m_naiveScrollPanel;
 	private JScrollPane m_mlpScrollPanel;
+	private JButton m_j48Export;
+	private JButton m_naiveExport;
+	private JButton m_mlpExport;
+	private JTextArea m_j48Results;
 	
 	private ArrayList<Classifier> m_models;
 
@@ -149,12 +155,39 @@ public class MainWindow extends JFrame implements ActionListener {
 		m_naivePanel = new JPanel();
 		m_mlpPanel = new JPanel();
 		
+		m_j48Export = new JButton("Exportar J48");
+		m_naiveExport = new JButton("Exportar Naive Bayes");
+		m_mlpExport = new JButton("Exportar MLP");
+		
+		m_j48Export.setActionCommand(EXPORT_RESULT);
+		m_j48Export.addActionListener(this);
+		m_naiveExport.setActionCommand(EXPORT_RESULT);
+		m_naiveExport.addActionListener(this);
+		m_mlpExport.setActionCommand(EXPORT_RESULT);
+		m_mlpExport.addActionListener(this);
+		
 		m_j48Result = new JLabel();
 		m_naiveResult = new JLabel();
 		m_mlpResult = new JLabel();
 		
+		m_j48Results = new JTextArea();
+		m_j48Results.setEditable(false);  
+		m_j48Results.setCursor(null);  
+		m_j48Results.setOpaque(false);  
+		m_j48Results.setFocusable(false);
+		m_j48Results.setLineWrap(true);
+		m_j48Results.setWrapStyleWord(true);
+		
+		m_j48Panel.setLayout(new BoxLayout(m_j48Panel, BoxLayout.PAGE_AXIS));
+		m_naivePanel.setLayout(new BoxLayout(m_naivePanel, BoxLayout.PAGE_AXIS));
+		m_mlpPanel.setLayout(new BoxLayout(m_mlpPanel, BoxLayout.PAGE_AXIS));
+		
+		m_j48Panel.add(m_j48Export);
 		m_j48Panel.add(m_j48Result);
+		m_j48Panel.add(m_j48Results);
+		m_naivePanel.add(m_naiveExport);
 		m_naivePanel.add(m_naiveResult);
+		m_mlpPanel.add(m_mlpExport);
 		m_mlpPanel.add(m_mlpResult);
 		
 		m_j48ScrollPanel = new JScrollPane(m_j48Panel);
@@ -193,6 +226,7 @@ public class MainWindow extends JFrame implements ActionListener {
 				m_models = modelList;
 				
 				// Weird stuff. Had to replace \n to <br> and set the text as html inside the label to allow "multilines"...
+				m_j48Results.setText(modelList.get(0).toString() + evalList.get(0));
 				m_j48Result.setText("<html>" + modelList.get(0).toString().replace("\n", "<br>") + evalList.get(0).replace("\n", "<br>") + "</html>");
 				m_naiveResult.setText("<html>" + modelList.get(1).toString().replace("\n", "<br>") + evalList.get(1).replace("\n", "<br>") + "</html>");
 				m_mlpResult.setText("<html>" + modelList.get(2).toString().replace("\n", "<br>") + evalList.get(2).replace("\n", "<br>") + "</html>");
@@ -200,8 +234,17 @@ public class MainWindow extends JFrame implements ActionListener {
 				m_tabPanel.setVisible(true);
 				setSize(getWidth(), getHeight() + m_tabPanel.getHeight());
 			}
-		} else if (IMPORT_MODELS.equals(e.getActionCommand())) {
-			/// TODO: Block the button if a model was generated.
+		} else if (EXPORT_RESULT.equals(e.getActionCommand())) {
+			JButton o = (JButton) e.getSource();
+			String buttonName = o.getText();
+			FileExplorer fileExplorer = new FileExplorer();
+			if (buttonName.contains("J48")) {
+				fileExplorer.exportResults(m_j48Result.getText());
+			} else if (buttonName.contains("Naive")) {
+				fileExplorer.exportResults(m_naiveResult.getText());
+			} else if (buttonName.contains("MLP")) {
+				fileExplorer.exportResults(m_mlpResult.getText());
+			}
 		} else if (FIND_PROMOTERS.equals(e.getActionCommand())) {
 			try {
 				PromoterFinder finder = new PromoterFinder(m_models);
@@ -213,15 +256,15 @@ public class MainWindow extends JFrame implements ActionListener {
 				    ArrayList<String> value = entry.getValue();
 				    if(key.contains("J48"))
 				    {
-				    	m_j48Result.setText("<html>" + value.toString().replace("\n", "<br>") + "</html>");
+				    	m_j48Result.setText(m_j48Result.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
 				    }
 				    else if(key.contains("Naive"))
 				    {
-				    	m_naiveResult.setText("<html>" + value.toString().replace("\n", "<br>") + "</html>");
+				    	m_naiveResult.setText(m_naiveResult.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
 				    }
 				    else if(key.contains("Multilayer"))
 				    {
-				    	m_mlpResult.setText("<html>" + value.toString().replace("\n", "<br>") + "</html>");
+				    	m_mlpResult.setText(m_mlpResult.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
 				    }
 				}
 				

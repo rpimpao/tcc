@@ -56,12 +56,6 @@ public class PromoterFinder {
 
 				double[] output = m_models.get(i).distributionForInstance(instances.instance(j));
 				
-				/*System.out.print("ID: " + instances.instance(i).value(0));
-				System.out.print(
-						", actual: " + instances.classAttribute().value((int) instances.instance(j).classValue()));
-				System.out.print(", predicted: " + instances.classAttribute().value((int) result));
-				System.out.println(", accuracy: " + output[((int) result)] * 100 + "%");*/
-				
 				String formattedResult = "Actual: " + instances.classAttribute().value((int) instances.instance(j).classValue()) 
 						+ ", Predicted: " + instances.classAttribute().value((int) result)
 						+ ", Accuracy: " + output[((int) result)] * 100 + "%\n";
@@ -81,6 +75,7 @@ public class PromoterFinder {
 
 	private void importModels()
 	{
+		JOptionPane.showMessageDialog(null, "Selecione os modelos que serão usados na classificação.");
 		FileExplorer explorer = new FileExplorer();
 		ArrayList<String> modelsPath = explorer.exploreModels();
 		m_models = new ArrayList<Classifier>();

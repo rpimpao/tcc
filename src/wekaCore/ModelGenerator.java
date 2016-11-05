@@ -37,7 +37,7 @@ public class ModelGenerator {
 			Instances reducedInstances = instances;
 			
 			int dialogResult = JOptionPane.showConfirmDialog(null, "Você gostaria de reduzir a base?" + 
-					"O processo pode ser demorado, mas a geração dos modelos será mais rápida.", "Atenção!", JOptionPane.YES_NO_OPTION);
+					" O processo pode ser demorado, mas a geração dos modelos será mais rápida.", "Atenção!", JOptionPane.YES_NO_OPTION);
 			if(dialogResult == JOptionPane.YES_OPTION){
 				// Attribute selection
 				AttributeSelection attsel = new AttributeSelection();
@@ -71,8 +71,10 @@ public class ModelGenerator {
 			
 			evaluateModels(reducedInstances);
 			
-			/// TODO: Ask to save models
-			saveModels(filePath);
+			dialogResult = JOptionPane.showConfirmDialog(null, "Você gostaria de salvar os modelos gerados?", "Atenção!", JOptionPane.YES_NO_OPTION);
+			if(dialogResult == JOptionPane.YES_OPTION){
+				saveModels(filePath);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
