@@ -66,7 +66,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JButton m_j48Export;
 	private JButton m_naiveExport;
 	private JButton m_mlpExport;
-	private JTextArea m_j48Results;
 	
 	private ArrayList<Classifier> m_models;
 
@@ -126,8 +125,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		m_hBoxActionBtnLeftMiddleSpacer = Box.createHorizontalGlue();
 		m_hBoxActionButtons.add(m_hBoxActionBtnLeftMiddleSpacer);
 
-		m_findPromotersBtn = new JButton("Encontrar promotores");
-		//m_findPromotersBtn.setEnabled(false);
+		m_findPromotersBtn = new JButton("Prever");
 		m_findPromotersBtn.setActionCommand(FIND_PROMOTERS);
 		m_findPromotersBtn.addActionListener(this);
 		m_hBoxActionButtons.add(m_findPromotersBtn);
@@ -170,21 +168,12 @@ public class MainWindow extends JFrame implements ActionListener {
 		m_naiveResult = new JLabel();
 		m_mlpResult = new JLabel();
 		
-		m_j48Results = new JTextArea();
-		m_j48Results.setEditable(false);  
-		m_j48Results.setCursor(null);  
-		m_j48Results.setOpaque(false);  
-		m_j48Results.setFocusable(false);
-		m_j48Results.setLineWrap(true);
-		m_j48Results.setWrapStyleWord(true);
-		
 		m_j48Panel.setLayout(new BoxLayout(m_j48Panel, BoxLayout.PAGE_AXIS));
 		m_naivePanel.setLayout(new BoxLayout(m_naivePanel, BoxLayout.PAGE_AXIS));
 		m_mlpPanel.setLayout(new BoxLayout(m_mlpPanel, BoxLayout.PAGE_AXIS));
 		
 		m_j48Panel.add(m_j48Export);
 		m_j48Panel.add(m_j48Result);
-		m_j48Panel.add(m_j48Results);
 		m_naivePanel.add(m_naiveExport);
 		m_naivePanel.add(m_naiveResult);
 		m_mlpPanel.add(m_mlpExport);
@@ -212,9 +201,11 @@ public class MainWindow extends JFrame implements ActionListener {
 		if (IMPORT_BASE.equals(e.getActionCommand())) {
 			FileExplorer fileExplorer = new FileExplorer();
 			String filePath = fileExplorer.exploreArffFiles();
-			m_basePath.setText(filePath);
-			m_generateModelsBtn.setEnabled(true);
-			m_findPromotersBtn.setEnabled(true);
+			if(!filePath.equals(""))
+			{
+				m_basePath.setText(filePath);
+				m_generateModelsBtn.setEnabled(true);
+			}
 		} else if (GENERATE_MODELS.equals(e.getActionCommand())) {
 			ModelGenerator models = new ModelGenerator(m_basePath.getText());
 			ArrayList<Classifier> modelList = new ArrayList<Classifier>();
@@ -226,7 +217,6 @@ public class MainWindow extends JFrame implements ActionListener {
 				m_models = modelList;
 				
 				// Weird stuff. Had to replace \n to <br> and set the text as html inside the label to allow "multilines"...
-				m_j48Results.setText(modelList.get(0).toString() + evalList.get(0));
 				m_j48Result.setText("<html>" + modelList.get(0).toString().replace("\n", "<br>") + evalList.get(0).replace("\n", "<br>") + "</html>");
 				m_naiveResult.setText("<html>" + modelList.get(1).toString().replace("\n", "<br>") + evalList.get(1).replace("\n", "<br>") + "</html>");
 				m_mlpResult.setText("<html>" + modelList.get(2).toString().replace("\n", "<br>") + evalList.get(2).replace("\n", "<br>") + "</html>");
@@ -249,27 +239,32 @@ public class MainWindow extends JFrame implements ActionListener {
 			try {
 				PromoterFinder finder = new PromoterFinder(m_models);
 				HashMap<String, ArrayList<String>> results = finder.getResults();
-				
-				for (Map.Entry<String, ArrayList<String>> entry : results.entrySet()) 
+				if(!results.isEmpty())
 				{
-				    String key = entry.getKey();
-				    ArrayList<String> value = entry.getValue();
-				    if(key.contains("J48"))
-				    {
-				    	m_j48Result.setText(m_j48Result.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
-				    }
-				    else if(key.contains("Naive"))
-				    {
-				    	m_naiveResult.setText(m_naiveResult.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
-				    }
-				    else if(key.contains("Multilayer"))
-				    {
-				    	m_mlpResult.setText(m_mlpResult.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
-				    }
+					for (Map.Entry<String, ArrayList<String>> entry : results.entrySet()) 
+					{
+					    String key = entry.getKey();
+					    ArrayList<String> value = entry.getValue();
+					    if(key.contains("J48"))
+					    {
+					    	m_j48Result.setText(m_j48Result.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
+					    }
+					    else if(key.contains("Naive"))
+					    {
+					    	m_naiveResult.setText(m_naiveResult.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
+					    }
+					    else if(key.contains("Multilayer"))
+					    {
+					    	m_mlpResult.setText(m_mlpResult.getText().replace("</html>", "<br>" + value.toString().replace("\n", "<br>") + "</html>"));
+					    }
+					}
+					
+					if(!m_tabPanel.isVisible())
+					{
+						m_tabPanel.setVisible(true);
+						setSize(getWidth(), getHeight() + m_tabPanel.getHeight());
+					}
 				}
-				
-				m_tabPanel.setVisible(true);
-				setSize(getWidth(), getHeight() + m_tabPanel.getHeight());
 			    
 			} catch (Exception e1) {
 				e1.printStackTrace();

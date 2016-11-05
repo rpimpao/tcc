@@ -1,8 +1,7 @@
 package ui;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
@@ -15,7 +14,7 @@ public class FileExplorer {
 	}
 
 	public String exploreArffFiles() {
-		String filePath = new File("").getAbsolutePath();;
+		String filePath = "";
 		JFileChooser fileExplorer = new JFileChooser();
 		fileExplorer.setDialogTitle("Selecione uma base ARFF");
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("ARFF Files", "arff");
@@ -93,14 +92,14 @@ public class FileExplorer {
 			target = "Results";
 		}
 
-		ObjectOutputStream resultOutputStream;
-		try {
-			resultOutputStream = new ObjectOutputStream(
-					new FileOutputStream(path + "/" + target + ".txt"));
-			toExport.replace("<html>", "").replace("</html>", "");
-			resultOutputStream.writeObject(toExport.replace("<br>", "\n"));
-			resultOutputStream.flush();
-			resultOutputStream.close();
+		
+		try{
+			PrintWriter writer = new PrintWriter(path + "/" + target + ".txt", "UTF-8");
+		    toExport = toExport.replace("<html>", "");
+		    toExport = toExport.replace("</html>", "");
+		    toExport = toExport.replace("<br>", "\n");
+		    writer.print(toExport);
+		    writer.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

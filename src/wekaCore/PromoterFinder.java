@@ -24,6 +24,13 @@ public class PromoterFinder {
 		JOptionPane.showMessageDialog(null, "Importe uma base para ser classificada.");
 		FileExplorer explorer = new FileExplorer();
 		m_basePath = explorer.exploreArffFiles();
+		
+		m_results = new HashMap<String,ArrayList<String>>();
+		
+		if(!m_basePath.contains(".arff"))
+		{
+			return;
+		}
 
 		if (models.isEmpty()) 
 		{
@@ -40,13 +47,9 @@ public class PromoterFinder {
 		instances.setClassIndex(instances.numAttributes() - 1);
 
 		Instances labeled = new Instances(instances);
-
-		m_results = new HashMap<String,ArrayList<String>>();
 		
 		for (int i = 0; i < m_models.size(); i++) 
 		{
-			
-			// Run with the last instance of the dataset -> test only
 			// label instances
 			ArrayList<String> results = new ArrayList<String>();
 			for (int j = 0; j < instances.numInstances(); j++) 
@@ -56,9 +59,9 @@ public class PromoterFinder {
 
 				double[] output = m_models.get(i).distributionForInstance(instances.instance(j));
 				
-				String formattedResult = "Actual: " + instances.classAttribute().value((int) instances.instance(j).classValue()) 
-						+ ", Predicted: " + instances.classAttribute().value((int) result)
-						+ ", Accuracy: " + output[((int) result)] * 100 + "%\n";
+				String formattedResult = "Atual: " + instances.classAttribute().value((int) instances.instance(j).classValue()) 
+						+ ", Previsto: " + instances.classAttribute().value((int) result)
+						+ ", Precisão: " + output[((int) result)] * 100 + "%\n";
 				
 				results.add(formattedResult);
 			}

@@ -49,8 +49,6 @@ public class ModelGenerator {
 				attsel.SelectAttributes(instances);
 				reducedInstances = attsel.reduceDimensionality(instances);
 				
-				JOptionPane.showMessageDialog(null, "Reduced vs normal " + reducedInstances.numAttributes() + " " + instances.numAttributes());
-				
 				// Save the reduced base to avoid waiting for hours...
 				String reducedBasePath = filePath.replace(".arff", "_REDUCED.arff");
 				ArffSaver saver = new ArffSaver();
@@ -89,17 +87,18 @@ public class ModelGenerator {
 		File arffFile = new File(filePath);
 		
 		for (int i = 0; i < m_models.size(); i++) {
-			ObjectOutputStream mlpOutputStream;
+			ObjectOutputStream outputStream;
 			try {
-				mlpOutputStream = new ObjectOutputStream(
-						new FileOutputStream(path + "/" + m_models.get(i).getClass().getSimpleName() + "_" + arffFile.getName().replace(".arff", "") + ".model"));
-				mlpOutputStream.writeObject(m_models.get(i));
-				mlpOutputStream.flush();
-				mlpOutputStream.close();
+				String outputPath = path + "/" + m_models.get(i).getClass().getSimpleName() + "_" + arffFile.getName().replace(".arff", "") + ".model";
+				outputStream = new ObjectOutputStream(new FileOutputStream(outputPath));
+				outputStream.writeObject(m_models.get(i));
+				outputStream.flush();
+				outputStream.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		JOptionPane.showMessageDialog(null, "Modelos salvos em " + path);
 	}
 	
 	private void evaluateModels(Instances instances)
