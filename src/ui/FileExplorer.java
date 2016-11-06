@@ -69,32 +69,13 @@ public class FileExplorer {
 		return modelsPath;
 	}
 	
-	public void exportResults(String toExport)
+	public void exportResults(String toExport, String modelName)
 	{
 		JOptionPane.showMessageDialog(null, "Selecione onde deseja salvar o arquivo.");
 		String path = searchDir();
-		String target;
-		
-		if(toExport.contains("J48"))
-		{
-			target = "J48 Results";
-		}
-		else if(toExport.contains("Naive"))
-		{
-			target = "Naive Bayes Results";
-		}
-		else if(toExport.contains("MLP") || toExport.contains("Multilayer"))
-		{
-			target = "MLP Results";
-		}
-		else
-		{
-			target = "Results";
-		}
-
 		
 		try{
-			PrintWriter writer = new PrintWriter(path + "/" + target + ".txt", "UTF-8");
+			PrintWriter writer = new PrintWriter(path + "/" + modelName + ".txt", "UTF-8");
 		    toExport = toExport.replace("<html>", "");
 		    toExport = toExport.replace("</html>", "");
 		    toExport = toExport.replace("<br>", "\n");

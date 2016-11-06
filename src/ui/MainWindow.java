@@ -225,11 +225,11 @@ public class MainWindow extends JFrame implements ActionListener {
 			String buttonName = o.getText();
 			FileExplorer fileExplorer = new FileExplorer();
 			if (buttonName.contains("J48")) {
-				fileExplorer.exportResults(m_j48Result.getText());
+				fileExplorer.exportResults(m_j48Result.getText(), "J48");
 			} else if (buttonName.contains("Naive")) {
-				fileExplorer.exportResults(m_naiveResult.getText());
+				fileExplorer.exportResults(m_naiveResult.getText(), "Naive Bayes");
 			} else if (buttonName.contains("MLP")) {
-				fileExplorer.exportResults(m_mlpResult.getText());
+				fileExplorer.exportResults(m_mlpResult.getText(), "MLP");
 			}
 		} else if (FIND_PROMOTERS.equals(e.getActionCommand())) {
 			try {
