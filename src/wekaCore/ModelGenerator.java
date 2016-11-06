@@ -40,21 +40,7 @@ public class ModelGenerator {
 					" O processo pode ser demorado, mas a geração dos modelos será mais rápida.", "Atenção!", JOptionPane.YES_NO_OPTION);
 			if(dialogResult == JOptionPane.YES_OPTION){
 				// Attribute selection
-				AttributeSelection attsel = new AttributeSelection();
-				CfsSubsetEval subsetEval = new CfsSubsetEval();
-				BestFirst bestFirst = new BestFirst();
-
-				attsel.setEvaluator(subsetEval);
-				attsel.setSearch(bestFirst);
-				attsel.SelectAttributes(instances);
-				reducedInstances = attsel.reduceDimensionality(instances);
-				
-				// Save the reduced base to avoid waiting for hours...
-				String reducedBasePath = filePath.replace(".arff", "_REDUCED.arff");
-				ArffSaver saver = new ArffSaver();
-				saver.setInstances(reducedInstances);
-				saver.setFile(new File(reducedBasePath));
-				saver.writeBatch();
+				reducedInstances = reduceInstances(filePath, instances);
 			}
 			
 			j48Model.buildClassifier(reducedInstances);
@@ -77,6 +63,26 @@ public class ModelGenerator {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Instances reduceInstances(String filePath, Instances instances) throws Exception {
+		Instances reducedInstances;
+		AttributeSelection attsel = new AttributeSelection();
+		CfsSubsetEval subsetEval = new CfsSubsetEval();
+		BestFirst bestFirst = new BestFirst();
+
+		attsel.setEvaluator(subsetEval);
+		attsel.setSearch(bestFirst);
+		attsel.SelectAttributes(instances);
+		reducedInstances = attsel.reduceDimensionality(instances);
+		
+		// Save the reduced base to avoid waiting for hours...
+		String reducedBasePath = filePath.replace(".arff", "_REDUCED.arff");
+		ArffSaver saver = new ArffSaver();
+		saver.setInstances(reducedInstances);
+		saver.setFile(new File(reducedBasePath));
+		saver.writeBatch();
+		return reducedInstances;
 	}
 	
 	private void saveModels(String filePath)
@@ -109,7 +115,7 @@ public class ModelGenerator {
 			try {
 				eval = new Evaluation(instances);
 				eval.crossValidateModel(m_models.get(i), instances, 10, new Random(1));
-				m_evalResult.add(eval.toSummaryString("\nResults\n======\n", false).concat(eval.toClassDetailsString("\nDetailed Accuracy Results\n======\n")).concat(eval.toMatrixString("\nConfusion Matrix\n======\n")));
+				m_evalResult.add(eval.toSummaryString("\nResultados\n======\n", false).concat(eval.toClassDetailsString("\nResultados detalhados de precisão\n======\n")).concat(eval.toMatrixString("\nMatriz de Confusão\n======\n")));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

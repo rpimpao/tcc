@@ -75,7 +75,7 @@ public class FileExplorer {
 		String path = searchDir();
 		
 		try{
-			PrintWriter writer = new PrintWriter(path + "/" + modelName + ".txt", "UTF-8");
+			PrintWriter writer = new PrintWriter(path + "/" + modelName + " - Resultados" + ".txt", "UTF-8");
 		    toExport = toExport.replace("<html>", "");
 		    toExport = toExport.replace("</html>", "");
 		    toExport = toExport.replace("<br>", "\n");

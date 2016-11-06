@@ -41,6 +41,10 @@ public class PromoterFinder {
 			m_models = models;
 		}
 
+		classifyInstances();
+	}
+
+	private void classifyInstances() throws Exception {
 		DataSource baseInstances = new DataSource(m_basePath);
 		// Unlabled
 		Instances instances = baseInstances.getDataSet();
